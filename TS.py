@@ -7,6 +7,21 @@ stop = set(stopwords.words('english'))
 import string
 from TS_Parameters import RapidApi_key
 
+def read_topics():
+    topics = []
+    topics_preprocessed = []
+    with open('topics','r') as f_r:
+        lines = f_r.readlines()
+        for line in lines:
+            line = line.strip()
+            if line!="":
+                topics.append(line)
+                line = text_pre_process(line, remove_stopword=True, toLower=True,
+                                              remove_punctuations_numbers=True, min_word_len=3)
+
+                topics_preprocessed.append(line['sentence'])
+    return topics,topics_preprocessed
+
 def VectorSimilarity(first_vec,second_vec):
     '''
     Calculating the cosine similarity between two vectors
@@ -27,7 +42,6 @@ def text_pre_process(text,remove_stopword = True,toLower = True,remove_punctuati
 
     if toLower:
         text = text.lower()
-
     if remove_punctuations_numbers:
         translator = str.maketrans(string.punctuation, ' ' * len(string.punctuation))  # map punctuation to space
         text = text.translate(translator)
@@ -37,7 +51,6 @@ def text_pre_process(text,remove_stopword = True,toLower = True,remove_punctuati
         words = [i.strip() for i in text.split(' ') if (i not in stop) and (len(i) >= min_word_len)]
     else:
         words = [i.strip() for i in text.split(' ') if len(i) >= min_word_len]
-
     return {'sentence':' '.join(words),'words':words}
 
 
@@ -59,20 +72,7 @@ def TextSimilarity(similarity_type,first_text,second_text,USE_ENCODER,session,em
     else:
         return 0
 
-def read_topics():
-    topics = []
-    topics_preprocessed = []
-    with open('topics','r') as f_r:
-        lines = f_r.readlines()
-        for line in lines:
-            line = line.strip()
-            if line!="":
-                topics.append(line)
-                line = text_pre_process(line, remove_stopword=True, toLower=True,
-                                              remove_punctuations_numbers=True, min_word_len=3)
 
-                topics_preprocessed.append(line['sentence'])
-    return topics,topics_preprocessed
 
 def TopicsSimilarity(similarity_type,topics_model,topics,sentence,USE_ENCODER,session,embedded_text,text_input):
     sentence = text_pre_process(sentence,remove_stopword = True,toLower = True,remove_punctuations_numbers=True,min_word_len=3)
